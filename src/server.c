@@ -5,6 +5,7 @@
 #include <poll.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 
 
@@ -54,31 +55,50 @@ int main() {
         }
     };
 
-    for (;;) { // for (;;) means infinite loop
 
-        char buffer[256] = { 0 };
-            
-        if (poll(fds, 2, 50000) < 0) {
+    char buffer[256] = { 0 }; // { 0 } initializes all the values to 0
+    printf("Server: ");
+    fflush(stdout);
+
+    for (;;) { // for (;;) means infinite loop
+        int ret = poll(fds, 2, 50000);
+        if (ret < 0) {
             perror("server poll failed");
             exit(EXIT_FAILURE);
         }
+        if (ret == 0) {
+            continue; // timeout, nothing to read
+        }
+
 
         if (fds[0].revents & POLLIN) { // Using the bit operator & to check if revents include POLLIN
-            if (read(0, buffer, 255)) {
-                perror("failed to read");
+
+            ssize_t n = read(0, buffer, 255);
+
+            if (n < 0) {
+                perror("read failed");
+                exit(EXIT_FAILURE);
             }
             if (send(client_fd, buffer, 255, 0) < 0) {
                 perror("failed to send");
                 exit(EXIT_FAILURE);
             }
+            printf("Server: ");
+            fflush(stdout);
+
         } else if (fds[1].revents & POLLIN) {
             if (recv(client_fd, buffer, 255, 0) == 0) {
                 return 0;
             } else {
-                printf("Server: %s\n", buffer);
+                printf("\r");
+                printf("%*s\r", 80, "");
+                printf("\n");
+                printf("Client: %s\n", buffer);
             }
-            
+            printf("Server: ");
+            fflush(stdout);
         }
     }
+    printf("\n");
     return 0;
 }
