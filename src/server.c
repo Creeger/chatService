@@ -14,7 +14,7 @@ int main() {
 
     int sock_fd;
     if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("server socket failed\n");
+        perror("server socket failed");
         exit(EXIT_FAILURE);
     }
 
@@ -25,18 +25,18 @@ int main() {
     };
 
     if (bind(sock_fd, &address, sizeof(address)) < 0) {
-        perror("bind failed\n");
+        perror("bind failed");
         exit(EXIT_FAILURE);
     }
 
     if (listen(sock_fd, 10) < 0) {
-        perror("listen\n");
+        perror("listen");
         exit(EXIT_FAILURE);
     }
     
     int client_fd;
     if ((client_fd = accept(sock_fd, 0, 0)) < 0) {
-        perror("accept\n");
+        perror("accept");
         exit(EXIT_FAILURE);
     }
     
@@ -59,21 +59,23 @@ int main() {
         char buffer[256] = { 0 };
             
         if (poll(fds, 2, 50000) < 0) {
-            perror("server poll failed\n");
+            perror("server poll failed");
             exit(EXIT_FAILURE);
         }
 
         if (fds[0].revents & POLLIN) { // Using the bit operator & to check if revents include POLLIN
-            read(0, buffer, 255);
+            if (read(0, buffer, 255)) {
+                perror("failed to read");
+            }
             if (send(client_fd, buffer, 255, 0) < 0) {
-                perror("failed to send\n");
+                perror("failed to send");
                 exit(EXIT_FAILURE);
             }
         } else if (fds[1].revents & POLLIN) {
             if (recv(client_fd, buffer, 255, 0) == 0) {
                 return 0;
             } else {
-                printf("%s\n", buffer);
+                printf("Server: %s\n", buffer);
             }
             
         }

@@ -53,7 +53,10 @@ int main() {
         }
 
         if (fds[0].revents & POLLIN) { // Using the bit operator & to check if revents include POLLIN
-            read(0, buffer, 255);
+            if (read(0, buffer, 255) < 0) {
+                perror("failed to read");
+                exit(EXIT_FAILURE);
+            }
             if (send(sock_fd, buffer, 255, 0) < 0) {
                 perror("failed to send");
                 exit(EXIT_FAILURE);
@@ -62,7 +65,7 @@ int main() {
             if (recv(sock_fd, buffer, 255, 0) == 0) {
                 return 0;
             } else {
-                printf("%s\n", buffer);
+                printf("Client: %s\n", buffer);
             }
             
         }
