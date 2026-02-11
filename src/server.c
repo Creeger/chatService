@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <string.h>
 
 
 
@@ -19,12 +20,8 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-   /* struct sockaddr_in address = {
-        AF_INET,
-        htons(9999),
-        0,
-    };*/
     struct sockaddr_in address;
+    memset(&address, 0, sizeof(address));
   
 
     address.sin_family = AF_INET;
