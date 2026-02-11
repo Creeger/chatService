@@ -56,11 +56,11 @@ int main() {
     };
 
 
-    char buffer[256] = { 0 }; // { 0 } initializes all the values to 0
     printf("Server: ");
     fflush(stdout);
 
     for (;;) { // for (;;) means infinite loop
+        char buffer[1024] = { 0 }; // { 0 } initializes all the values to 0
         int ret = poll(fds, 2, 50000);
         if (ret < 0) {
             perror("server poll failed");

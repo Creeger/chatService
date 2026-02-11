@@ -45,9 +45,9 @@ int main() {
     };
     printf("Client: ");
     fflush(stdout);
-    char buffer[1024] = { 0 };
 
     for (;;) {
+        char buffer[1024] = { 0 };
         int ret = poll(fds, 2, -1);
         if (ret < 0) {
             perror("poll failed");
