@@ -18,14 +18,18 @@ int main() {
         perror("server socket failedn");
         exit(EXIT_FAILURE);
     }
+    struct sockaddr_in server_address;
 
-    struct sockaddr address = {
-        AF_INET,
-        htons(9999),
-        0,
-    };
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(9999);
+    server_address.sin_addr.s_addr = INADDR_ANY;
 
-    if (connect(sock_fd, &address, sizeof(address)) < 0) {
+    if (inet_pton(AF_INET, "192.168.10.146", &server_address.sin_addr) <= 0) {
+        perror("Invalid address/ Address not supported");
+        exit(EXIT_FAILURE);
+    }
+
+    if (connect(sock_fd, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }

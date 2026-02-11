@@ -19,13 +19,19 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    struct sockaddr address = {
+   /* struct sockaddr_in address = {
         AF_INET,
         htons(9999),
         0,
-    };
+    };*/
+    struct sockaddr_in address;
+  
 
-    if (bind(sock_fd, &address, sizeof(address)) < 0) {
+    address.sin_family = AF_INET;
+    address.sin_port = htons(9999);
+    address.sin_addr.s_addr = INADDR_ANY;
+
+    if (bind(sock_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
