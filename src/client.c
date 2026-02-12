@@ -25,13 +25,15 @@ int main() {
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(9999);
 
-    if (inet_pton(AF_INET, "192.168.10.146", &server_address.sin_addr) <= 0) {
+    char* server_ip = "192.168.10.188";
+
+    if (inet_pton(AF_INET, server_ip, &server_address.sin_addr) <= 0) {
         perror("Invalid address/ Address not supported");
         exit(EXIT_FAILURE);
     }
-
+    printf("connecting to: %s\n", server_ip);
     if (connect(sock_fd, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
-        perror("bind failed");
+        perror("connect failed");
         exit(EXIT_FAILURE);
     }
 
