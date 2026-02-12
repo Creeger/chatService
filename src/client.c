@@ -24,7 +24,6 @@ int main() {
 
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(9999);
-    server_address.sin_addr.s_addr = INADDR_ANY;
 
     if (inet_pton(AF_INET, "192.168.10.146", &server_address.sin_addr) <= 0) {
         perror("Invalid address/ Address not supported");
@@ -62,8 +61,14 @@ int main() {
 
 
         if (fds[0].revents & POLLIN) {
-            read(0, buffer, 255);
-            if (send(sock_fd, buffer, 255, 0) < 0) {
+            ssize_t n = read(0, buffer, 255);
+
+            if (n < 0) {
+                perror("read failed");
+                exit(EXIT_FAILURE);
+            }
+
+            if (send(sock_fd, buffer, n, 0) < 0) {
                 perror("failed to send");
                 exit(EXIT_FAILURE);
             }

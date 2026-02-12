@@ -46,16 +46,8 @@ int main() {
     
     // stdin - 0
     struct pollfd fds[2] = {
-        {
-            0,
-            POLLIN,
-            0
-        },
-        {
-            client_fd,
-            POLLIN,
-            0,
-        }
+        {0, POLLIN, 0},
+        {client_fd, POLLIN, 0}
     };
 
 
@@ -82,7 +74,7 @@ int main() {
                 perror("read failed");
                 exit(EXIT_FAILURE);
             }
-            if (send(client_fd, buffer, 255, 0) < 0) {
+            if (send(client_fd, buffer, n, 0) < 0) {
                 perror("failed to send");
                 exit(EXIT_FAILURE);
             }
