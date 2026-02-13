@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
+#include "getIpAddr.h"
 
 
 
@@ -25,7 +26,22 @@ int main() {
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(9999);
 
-    char* server_ip = "192.168.10.188";
+    char *client_ip = getIpAddr();
+
+    if (client_ip) {
+        printf("Local IP: %s\n", client_ip);
+        free(client_ip);
+    } else {
+        printf("Could not get IP\n");
+    }
+    
+    char* server_ip;
+    if (strcmp(client_ip, "192.168.10.145") != 0) {
+        server_ip = "192.168.10.188";
+    } else {
+        server_ip = "192.168.10.145";
+    }
+
 
     if (inet_pton(AF_INET, server_ip, &server_address.sin_addr) <= 0) {
         perror("Invalid address/ Address not supported");
@@ -39,7 +55,7 @@ int main() {
 
     // stdin - 0
     struct pollfd fds[2] = {
-        {
+            {
             0,
             POLLIN,
             0
