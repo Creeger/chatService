@@ -36,7 +36,7 @@ int main() {
     }
     
     char* server_ip;
-    if (strcmp(client_ip, "192.168.10.145") != 0) {
+    if (strcmp(client_ip, "192.168.10.145") == 0) {
         server_ip = "192.168.10.188";
     } else {
         server_ip = "192.168.10.145";
