@@ -7,12 +7,19 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
+#include "sndRcvFiles.h"
+#include <inttypes.h>
 
 
+#define MSG_TEXT 1
+#define MSG_FILE 2
 
-
+void serverSendToClient(int sock);
+void serverRecieveFromClient(int sock);
 
 int main() {
+    printf("To type a text message, simply type the message and hit enter\n");
+    printf("To send a file, type the command '/file' and then provide the full path and name of the file\n");
 
     int sock_fd;
     if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -38,6 +45,9 @@ int main() {
         exit(EXIT_FAILURE);
     }
     
+    printf("Server listening on port 9999...\n");
+    fflush(stdout);
+
     int client_fd;
     if ((client_fd = accept(sock_fd, 0, 0)) < 0) {
         perror("accept");
@@ -65,35 +75,87 @@ int main() {
             continue; // timeout, nothing to read
         }
 
-
+        // Send something to the client
         if (fds[0].revents & POLLIN) { // Using the bit operator & to check if revents include POLLIN
+            serverSendToClient(client_fd); 
+        }
 
-            ssize_t n = read(0, buffer, 255);
-
-            if (n < 0) {
-                perror("read failed");
-                exit(EXIT_FAILURE);
-            }
-            if (send(client_fd, buffer, n, 0) < 0) {
-                perror("failed to send");
-                exit(EXIT_FAILURE);
-            }
-            printf("Server: ");
-            fflush(stdout);
-
-        } else if (fds[1].revents & POLLIN) {
-            if (recv(client_fd, buffer, 255, 0) == 0) {
-                return 0;
-            } else {
-                printf("\r");
-                printf("%*s\r", 80, "");
-                printf("\n");
-                printf("Client: %s\n", buffer);
-            }
-            printf("Server: ");
-            fflush(stdout);
+        // Receive something from the client
+        if (fds[1].revents & POLLIN) {
+            serverRecieveFromClient(client_fd);
         }
     }
     printf("\n");
     return 0;
+}
+
+
+void serverSendToClient(int sock) {
+    char input[1024];
+    fgets(input, sizeof(input), stdin);
+    input[strcspn(input, "\n")] = '\0';
+    
+    if (strncmp(input, "/file ", 6) == 0) {
+        input[strcspn(input, "\n")] = 0;
+        char *path = input + 6;
+
+        uint8_t messageType = MSG_FILE;
+        send(sock, &messageType, 1, 0);
+
+        sendFile(sock, path);
+    } else {
+        uint8_t messageType = MSG_TEXT;
+        uint32_t messageLength = htonl(strlen(input));
+        
+        send(sock, &messageType, 1, 0);
+        send(sock, &messageLength, sizeof(messageLength), 0);
+        send(sock, input, strlen(input), 0);
+    }
+    printf("Server: ");
+    fflush(stdout);
+}
+
+void serverRecieveFromClient(int sock) {
+    uint8_t messageType;
+
+    if (recv(sock, &messageType, 1, 0) <= 0) {
+        return;
+    }
+
+    if (messageType == MSG_TEXT) { 
+        uint32_t messageLength;
+
+        if (recv(sock, &messageLength, sizeof(messageLength), 0) <= 0) {
+            printf("Server failed to get the message length\n");
+            return;
+        }
+        messageLength = ntohl(messageLength);
+
+        char *buffer = malloc(messageLength + 1);
+        if (recv(sock, buffer, messageLength, 0) == 0) {
+            free(buffer);
+            printf("Client failed to get message length\n");
+            return;
+        }
+        buffer[messageLength] = '\0';
+
+        printf("\r");
+        printf("%*s\r", 80, "");
+        printf("\n");
+        printf("Client: %s\n", buffer);
+
+        free(buffer);
+    
+        printf("Server: ");
+        fflush(stdout); 
+
+    } else if (messageType == MSG_FILE) {
+        int result = getFile(sock);
+        if (result < 0) {
+            printf("Unable to recieve file\n");
+        } 
+        printf("Server: ");
+        fflush(stdout);
+    }
+    return;
 }
