@@ -103,7 +103,7 @@ int getFile(int sock) {
         return 1;
     }
     char fullPath[1024];
-    snprintf(fullPath, sizeof(fullPath), "%s/Documents/projects/chatService/Files%s", home, fileName);
+    snprintf(fullPath, sizeof(fullPath), "%s%s", downloadDir, fileName);
 
     FILE *fp = fopen(fullPath, "wb");
     if (!fp) {
