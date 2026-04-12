@@ -10,7 +10,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 
-const char *downloadDir = "/home/Creeger/Documents/projects/chatService/Files/";
+const char *downloadDir = "~/Documents/projects/chatService/Files/";
 
 ssize_t getStream(int sock, void *buf, size_t dataLength) {
     uint64_t totalRead = 0; // To be recieved from the network
