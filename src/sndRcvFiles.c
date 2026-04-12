@@ -96,8 +96,14 @@ int getFile(int sock) {
     }
     uint64_t fileSize = be64toh(networkFileSize);
     
+    const char *home = getenv("HOME");
+    if(!home) {
+        printf("Could not get HOME directory\n");
+        free(fileName);
+        return 1;
+    }
     char fullPath[1024];
-    snprintf(fullPath, sizeof(fullPath), "%s%s", downloadDir, fileName);
+    snprintf(fullPath, sizeof(fullPath), "%s/Documents/projects/chatService/Files%s", home, fileName);
 
     FILE *fp = fopen(fullPath, "wb");
     if (!fp) {
