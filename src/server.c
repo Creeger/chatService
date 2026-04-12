@@ -92,7 +92,13 @@ int main() {
 
 void serverSendToClient(int sock) {
     char input[1024];
-    fgets(input, sizeof(input), stdin);
+    if (fgets(input, sizeof(input), stdin) == NULL) {
+        perror("serverSendToClient(): fgets failed");
+        return;
+    }
+
+
+
     input[strcspn(input, "\n")] = '\0';
     
     if (strncmp(input, "/file ", 6) == 0) {
